@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        #container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>notes Page</h1>
+    <a href="./index.html">home page</a>
+    <a href="./signup.html">Sign Up</a>
+    <a href="./login.html">Log in</a>
+    <a href="./post.html">Posts</a>
+    <form>
+        Title: <input id="title" type="text" placeholder="title">
+        Content: <input id="cont" type="text" placeholder="content">
+        device : <input id="sub" type="text" placeholder="device">
+        <input id="submit" type="submit">
+    </form>
+
+    <div id="container"></div>
+
+
+</body>
+
+<script>
+    let container = document.querySelector("#container")
+    let form = document.querySelector("form")
+    let delbtn = [];
+    let token = localStorage.getItem("token");
+    let dataArray = []
+    let baseURL = "https://plum-thankful-fawn.cyclic.app"
+
+
+    fetching()
+    function fetching() {
+        if (token) {
+            fetch(`http://localhost:8900/posts/`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `${token}`
+                }
+            }).then((res) => res.json()).then((res) => {
+                console.log(res)
+                dataArray = res
+                let str = "";
+                res.forEach((el) => {
+                    str += `<div>
+                            <h3>${el.title}</h3>
+                            <p>${el.body}</p>
+                            <h4>${el.device}</h4>
+                            <button class="deletebtn" data-id="${el._id}">Delete</button>
+                            <button class="updatebtn" data-id="${el._id}">Update</button>
+                        </div>`
+                });
+                container.innerHTML = str
+                delbtn = document.querySelectorAll(".deletebtn")
+                deleting();
+                updating();
+            }).catch((err) => console.log(err))
+        }
+    }
+
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        adding()
+    })
+    function adding() {
+        let title = document.querySelector("#title").value
+        let body = document.querySelector("#cont").value
+        let device = document.querySelector("#sub").value
+        let obj = {
+            title,
+            body,
+            device
+        }
+        if (token) {
+            fetch("http://localhost:8900/posts/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `${token}`
+                },
+                body: JSON.stringify(obj)
+            }).then((res) => res.json()).then((res) => {
+                fetching();
+            }).catch((err) => console.log(err))
+        }
+    }
+
+
+    function deleting() {
+        if (token) {
+            for (let i = 0; i < delbtn.length; i++) {
+                delbtn[i].addEventListener("click", (e) => {
+                    console.log(e.target.dataset.id)
+                    deleteProcess(e.target.dataset.id);
+                })
+            }
+        }
+    }
+    function deleteProcess(id) {
+        fetch(`http://localhost:8900/posts/delete/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        }).then((res) => res.json()).then((res) => {
+            console.log(res)
+            fetching()
+        }).catch((err) => console.log(err))
+
+    }
+
+    // function updating() {
+    //     let updatebtn = document.querySelectorAll(".updatebtn")
+    //     if (token) {
+    //         updatebtn.forEach((el) => {
+    //             el.addEventListener("click", (e) => {
+    //                 updateProcess(e.target.dataset.id)
+    //             })
+    //         })
+    //     }
+    // }
+    // function updateProcess(id) {
+    //     container.innerHTML = container.innerHTML + `<div>
+    //                 <form id="updateform">
+    //                     <h1>Update form</h1>
+    //                     Title: <input id="title" type="text" placeholder="title">
+    //                     Content: <input id="content" type="text" placeholder="content">
+    //                     <input id="submit" type="submit">
+    //                 </form>
+    //                 </div>`
+    //     let uptform = document.querySelector("#updateform");
+    //     uptform.addEventListener("submit", (e) => {
+    //         e.preventDefault();
+    //         let obj = {}
+    //         dataArray.forEach((ele) => {
+    //             if (ele._id == id) {
+    //                 let { title, body, sub } = ele
+    //                 obj = {
+    //                     title: document.querySelector("#updateform>#title").value || title,
+    //                     body: document.querySelector("#updateform>#content").value || body,
+    //                 }
+    //             }
+    //         })
+    //         fetch(`/update/${id}`, {
+    //             method: "PATCH",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //                 "Authorization": `Bearer ${token}`
+    //             },
+    //             body: JSON.stringify(obj)
+    //         }).then((res) => res.json()).then((res) => {
+    //             console.log(res)
+    //             fetching();
+    //         }).catch((err) => console.log(err))
+    //     })
+    // }
+</script>
+
+</html>

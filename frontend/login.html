@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>Login Page</h1>
+    <a href="./index.html">home page</a>
+    <a href="./signup.html">Sign Up</a>
+    <a href="./login.html">Log in</a>
+    <a href="./post.html">Posts</a>
+    <form>
+        Email: <input id="email" type="email" placeholder="email">
+        Password: <input id="password" type="password" placeholder="password">
+        <input type="submit">
+    </form>
+</body>
+
+<script>
+    let form = document.querySelector("form");
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        signup();
+    })
+    async function signup() {
+        let email = document.querySelector("#email").value;
+        let password = document.querySelector("#password").value;
+        let obj = {
+            email,
+            password
+        }
+        console.log(obj)
+        fetch("http://localhost:8900/users/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(obj)
+        }).then((res) => res.json()).then((res) => {
+            console.log(res)
+            localStorage.setItem("token", res.token)
+        }).catch((err) => {
+            console.log(err)
+        })
+
+    }
+</script>
+
+</html>
